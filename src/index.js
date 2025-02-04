@@ -15,11 +15,9 @@ class Switcher {
   // Добавление нового случая
   case(condition, action) {
     const existingCase = this.cases.find((c) => isEqual(c.condition, condition));
-
     If(!existingCase)
       .Then(() => this.cases.push({ condition, action }))
       .Else(() => console.log('Case already exists'));
-
     return this; // Возвращаем this для цепочки вызовов
   }
 
@@ -29,26 +27,42 @@ class Switcher {
     return this; // Возвращаем this для цепочки вызовов
   }
 
-  execute() {
-  const matchedCase = this.cases.find(({ condition }) => {
-    if (condition === True || condition === False) {
-      return condition === this.value; // Сравнение с true/false
-    }
-    return isEqual(condition, this.value); // Глубокое сравнение
-  });
+  // Выполнение соответствующего случая
+  execute(signal) {
+    const matchedCase = this.cases.find(({ condition }) => {
+      if (condition === True || condition === False) {
+        return condition === this.value; // Сравнение с true/false
+      }
+      return isEqual(condition, this.value); // Глубокое сравнение
+    });
 
-  if (matchedCase) {
-    try {
-      return matchedCase.action(this.value); // Возвращаем результат действия
-    } catch (error) {
-      console.error(error); // Перехватываем ошибку и выводим её
+    if (matchedCase) {
+      try {
+        if (signal && signal.aborted) {
+          console.log('Action was aborted');
+          return;
+        }
+        // Используем Promise.resolve() для синхронных действий
+        return Promise.resolve().then(() => {
+          if (signal && signal.aborted) {
+            console.log('Action was aborted during execution');
+            return;
+          }
+          return matchedCase.action(this.value, signal);
+        });
+      } catch (error) {
+        console.error(error); // Перехватываем ошибку и выводим её
+      }
+    } else if (this.defaultAction) {
+      if (signal && signal.aborted) {
+        console.log('Default action was aborted');
+        return;
+      }
+      return this.defaultAction(signal); // Возвращаем результат действия по умолчанию
+    } else {
+      console.log('No matching case found');
     }
-  } else if (this.defaultAction) {
-    return this.defaultAction(); // Возвращаем результат действия по умолчанию
-  } else {
-    console.log('No matching case found');
   }
-}
 }
 
 function Switch(value) {

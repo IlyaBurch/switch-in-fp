@@ -5,18 +5,18 @@ const False = require('false');
 
 describe('Switcher - Basic Functionality', () => {
   test('should execute the correct case and return a value', () => {
-  const result = Switch(42)
-    .case(42, (v) => v * 2)
-    .execute();
-  expect(result).toBe(84);
-});
+    const result = Switch(42)
+      .case(42, (v) => v * 2)
+      .execute();
+    expect(result).toBe(84);
+  });
 
-test('should handle no matching case and return undefined', () => {
-  const result = Switch(50)
-    .case(42, () => {})
-    .execute();
-  expect(result).toBeUndefined();
-});
+  test('should handle no matching case and return undefined', () => {
+    const result = Switch(50)
+      .case(42, () => { })
+      .execute();
+    expect(result).toBeUndefined();
+  });
   test('should execute the correct case with deep equality', () => {
     const mockFn = jest.fn();
     Switch([{ key: 'value' }])
@@ -28,8 +28,8 @@ test('should handle no matching case and return undefined', () => {
   test('should handle no matching case with default action', () => {
     const mockFn = jest.fn();
     Switch(50)
-      .case(42, () => {})
-      .case(43, () => {})
+      .case(42, () => { })
+      .case(43, () => { })
       .else(mockFn)
       .execute();
     expect(mockFn).toHaveBeenCalled();
@@ -38,8 +38,8 @@ test('should handle no matching case and return undefined', () => {
   test('should handle no matching case without default action', () => {
     console.log = jest.fn(); // Перехватываем console.log
     Switch(50)
-      .case(42, () => {})
-      .case(43, () => {})
+      .case(42, () => { })
+      .case(43, () => { })
       .execute();
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
@@ -47,23 +47,23 @@ test('should handle no matching case and return undefined', () => {
 
 describe('Switcher - Edge Cases', () => {
   test('should handle zero as input and return a value', () => {
-  const result = Switch(0)
-    .case(0, (v) => v + 1)
-    .execute();
-  expect(result).toBe(1);
-});
+    const result = Switch(0)
+      .case(0, (v) => v + 1)
+      .execute();
+    expect(result).toBe(1);
+  });
 
-test('should handle negative numbers and return a value', () => {
-  const result = Switch(-1)
-    .case(-1, (v) => v * -1)
-    .execute();
-  expect(result).toBe(1);
-});
+  test('should handle negative numbers and return a value', () => {
+    const result = Switch(-1)
+      .case(-1, (v) => v * -1)
+      .execute();
+    expect(result).toBe(1);
+  });
   test('should handle zero as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
     Switch(0)
-      .case(1, () => {})
-      .case(2, () => {})
+      .case(1, () => { })
+      .case(2, () => { })
       .execute();
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
@@ -71,8 +71,8 @@ test('should handle negative numbers and return a value', () => {
   test('should handle negative numbers', () => {
     console.log = jest.fn(); // Перехватываем console.log
     Switch(-1)
-      .case(1, () => {})
-      .case(2, () => {})
+      .case(1, () => { })
+      .case(2, () => { })
       .execute();
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
@@ -80,8 +80,8 @@ test('should handle negative numbers and return a value', () => {
   test('should handle null as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
     Switch(null)
-      .case(1, () => {})
-      .case(2, () => {})
+      .case(1, () => { })
+      .case(2, () => { })
       .execute();
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
@@ -89,8 +89,8 @@ test('should handle negative numbers and return a value', () => {
   test('should handle undefined as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
     Switch(undefined)
-      .case(1, () => {})
-      .case(2, () => {})
+      .case(1, () => { })
+      .case(2, () => { })
       .execute();
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
@@ -98,8 +98,8 @@ test('should handle negative numbers and return a value', () => {
   test('should handle empty string as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
     Switch('')
-      .case(1, () => {})
-      .case(2, () => {})
+      .case(1, () => { })
+      .case(2, () => { })
       .execute();
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
@@ -107,8 +107,8 @@ test('should handle negative numbers and return a value', () => {
   test('should handle empty array as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
     Switch([])
-      .case(1, () => {})
-      .case(2, () => {})
+      .case(1, () => { })
+      .case(2, () => { })
       .execute();
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
@@ -116,8 +116,8 @@ test('should handle negative numbers and return a value', () => {
   test('should handle empty object as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
     Switch({})
-      .case(1, () => {})
-      .case(2, () => {})
+      .case(1, () => { })
+      .case(2, () => { })
       .execute();
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
@@ -140,31 +140,229 @@ test('should handle negative numbers and return a value', () => {
 });
 
 describe('Switcher - Advanced Scenarios', () => {
+  test('should cancel action throwing an error via signal', () => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const mockFn = jest.fn();
+    console.error = jest.fn(); // Перехватываем console.error
+
+    Switch(42)
+      .case(42, (value, signal) => {
+        if (signal.aborted) {
+          mockFn('Aborted');
+          return;
+        }
+        throw new Error('Something went wrong');
+      })
+      .execute(signal);
+
+    controller.abort(); // Отменяем выполнение
+    expect(mockFn).toHaveBeenCalledWith('Aborted'); // Проверяем, что действие было отменено
+    expect(console.error).not.toHaveBeenCalled(); // Ошибка не должна быть выброшена
+  });
+  test('should cancel action returning a promise via signal', async () => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const mockFn = jest.fn();
+    Switch(42)
+      .case(42, (value, signal) => {
+        if (signal.aborted) {
+          mockFn('Aborted');
+          return;
+        }
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            if (signal.aborted) {
+              mockFn('Aborted');
+              return;
+            }
+            resolve(mockFn('Executed'));
+          }, 500);
+        });
+      })
+      .execute(signal);
+
+    controller.abort(); // Отменяем выполнение через 100 мс
+    await new Promise((resolve) => setTimeout(resolve, 600)); // Ждем завершения действия
+
+    expect(mockFn).toHaveBeenCalledWith('Aborted'); // Проверяем, что действие было отменено
+  });
+  test('should cancel action throwing an error via signal', async () => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const mockFn = jest.fn();
+    console.error = jest.fn(); // Перехватываем console.error
+
+    Switch(42)
+      .case(42, async (value, signal) => {
+        if (signal.aborted) {
+          mockFn('Aborted');
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Задержка
+        throw new Error('Something went wrong');
+      })
+      .execute(signal);
+
+    controller.abort(); // Отменяем выполнение
+    await new Promise((resolve) => setTimeout(resolve, 200)); // Ждём завершения действия
+
+    expect(mockFn).toHaveBeenCalledWith('Aborted'); // Проверяем, что действие было отменено
+    expect(console.error).not.toHaveBeenCalled(); // Ошибка не должна быть выброшена
+  });
+  test('should cancel action with setInterval via signal', async () => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const mockFn = jest.fn();
+    let intervalId;
+    Switch(42)
+      .case(42, (value, signal) => {
+        if (signal.aborted) {
+          mockFn('Aborted');
+          return;
+        }
+        intervalId = setInterval(() => {
+          if (signal.aborted) {
+            clearInterval(intervalId); // Очищаем интервал
+            mockFn('Aborted');
+            return;
+          }
+          mockFn('Executed');
+        }, 100);
+      })
+      .execute(signal);
+
+    controller.abort(); // Отменяем выполнение через 250 мс
+    await new Promise((resolve) => setTimeout(resolve, 300)); // Ждем завершения действия
+
+    expect(mockFn).toHaveBeenCalledWith('Aborted'); // Проверяем, что действие было отменено
+  });
+  test('should cancel synchronous action via signal', async () => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const mockFn = jest.fn();
+    Switch(42)
+      .case(42, async (value, signal) => {
+        if (signal.aborted) {
+          mockFn('Aborted');
+          return;
+        }
+        await Promise.resolve(); // Имитация синхронного действия
+        mockFn('Executed');
+      })
+      .execute(signal);
+
+    controller.abort(); // Отменяем выполнение
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Ждём завершения действия
+
+    expect(mockFn).toHaveBeenCalledWith('Aborted'); // Проверяем, что действие было отменено
+  });
+  // test('should cancel asynchronous action via signal', async () => {
+  //   const controller = new AbortController();
+  //   const { signal } = controller;
+
+  //   const mockFn = jest.fn();
+  //   Switch(42)
+  //     .case(42, async (value, signal) => {
+  //       if (signal.aborted) {
+  //         mockFn('Aborted');
+  //         return;
+  //       }
+  //       await new Promise((resolve) => setTimeout(resolve, 200)); // Задержка
+  //       if (signal.aborted) {
+  //         mockFn('Aborted');
+  //         return;
+  //       }
+  //       mockFn('Executed');
+  //     })
+  //     .execute(signal);
+
+  //   controller.abort(); // Отменяем выполнение через 100 мс
+  //   await new Promise((resolve) => setTimeout(resolve, 300)); // Ждём завершения действия
+
+  //   expect(mockFn).toHaveBeenCalledWith('Aborted'); // Проверяем, что действие было отменено
+  // });
+  test('should cancel action with setTimeout via signal', async () => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const mockFn = jest.fn();
+    Switch(42)
+      .case(42, (value, signal) => {
+        if (signal.aborted) {
+          mockFn('Aborted');
+          return;
+        }
+        setTimeout(() => {
+          if (signal.aborted) {
+            mockFn('Aborted');
+            return;
+          }
+          mockFn('Executed');
+        }, 500);
+      })
+      .execute(signal);
+
+    controller.abort(); // Отменяем выполнение через 100 мс
+    await new Promise((resolve) => setTimeout(resolve, 600)); // Ждем завершения действия
+
+    expect(mockFn).toHaveBeenCalledWith('Aborted'); // Проверяем, что действие было отменено
+  });
+  test('should handle cancellation via signal', async () => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const mockFn = jest.fn();
+    Switch(42)
+      .case(42, async (value, signal) => {
+        if (signal.aborted) {
+          mockFn('Aborted');
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 500)); // Добавляем задержку
+        if (signal.aborted) {
+          mockFn('Aborted');
+          return;
+        }
+        mockFn('Executed');
+      })
+      .execute(signal);
+
+    controller.abort(); // Отменяем выполнение через 100 мс
+    await new Promise((resolve) => setTimeout(resolve, 600)); // Ждем завершения действия
+
+    expect(mockFn).toHaveBeenCalledWith('Aborted'); // Проверяем, что действие было отменено
+  });
   test('should handle duplicate cases and return the first match', () => {
-  const result = Switch(1)
-    .case(1, (v) => v + 1)
-    .case(1, (v) => v + 2)
-    .execute();
-  expect(result).toBe(2); // Первый случай должен быть выполнен
-});
+    const result = Switch(1)
+      .case(1, (v) => v + 1)
+      .case(1, (v) => v + 2)
+      .execute();
+    expect(result).toBe(2); // Первый случай должен быть выполнен
+  });
 
-test('should handle asynchronous functions and return a value', async () => {
-  const result = await Switch(6)
-    .case(6, async () => {
-      return 'Async result';
-    })
-    .execute();
-  expect(result).toBe('Async result');
-});
+  test('should handle asynchronous functions and return a value', async () => {
+    const result = await Switch(6)
+      .case(6, async () => {
+        return 'Async result';
+      })
+      .execute();
+    expect(result).toBe('Async result');
+  });
 
-test('should handle errors in actions and return undefined', () => {
-  const result = Switch(7)
-    .case(7, () => {
-      throw new Error('Something went wrong');
-    })
-    .execute();
-  expect(result).toBeUndefined(); // Ошибка должна быть обработана
-});
+  test('should handle errors in actions and return undefined', () => {
+    const result = Switch(7)
+      .case(7, () => {
+        throw new Error('Something went wrong');
+      })
+      .execute();
+    expect(result).toBeUndefined(); // Ошибка должна быть обработана
+  });
   test('should handle new String("123") === "123" using deep equality', () => {
     const mockFn = jest.fn();
     Switch(new String('123'))
@@ -191,7 +389,7 @@ test('should handle errors in actions and return undefined', () => {
   test('should handle no matching case for new String("123") vs "456"', () => {
     console.log = jest.fn(); // Перехватываем console.log
     Switch(new String('123'))
-      .case('456', () => {})
+      .case('456', () => { })
       .execute();
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
@@ -199,7 +397,7 @@ test('should handle errors in actions and return undefined', () => {
   test('should handle no matching case for new String("123") vs new String("456")', () => {
     console.log = jest.fn(); // Перехватываем console.log
     Switch(new String('123'))
-      .case(new String('456'), () => {})
+      .case(new String('456'), () => { })
       .execute();
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
@@ -379,8 +577,8 @@ describe('Switcher - Definetely not useless Super Mega Advanced Functionality', 
   test('should handle NaN as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
     Switch(NaN)
-      .case(1, () => {})
-      .case(2, () => {})
+      .case(1, () => { })
+      .case(2, () => { })
       .execute();
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
@@ -388,14 +586,14 @@ describe('Switcher - Definetely not useless Super Mega Advanced Functionality', 
   test('should handle Infinity as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
     Switch(Infinity)
-      .case(1, () => {})
-      .case(2, () => {})
+      .case(1, () => { })
+      .case(2, () => { })
       .execute();
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
 
   test('should handle custom classes as input', () => {
-    class CustomClass {}
+    class CustomClass { }
     const instance = new CustomClass();
     const mockFn = jest.fn();
     Switch(instance)
@@ -406,7 +604,7 @@ describe('Switcher - Definetely not useless Super Mega Advanced Functionality', 
 
   test('should handle functions as input', () => {
     const mockFn = jest.fn();
-    const func = () => {};
+    const func = () => { };
     Switch(func)
       .case(func, mockFn)
       .execute();
@@ -505,7 +703,7 @@ describe('Switcher - Definetely not useless Super Mega Advanced Functionality', 
     const mockFn = jest.fn();
     Switch(42)
       .case(42, mockFn)
-      .case(43, () => {})
+      .case(43, () => { })
       .execute();
     expect(mockFn).toHaveBeenCalled();
   });
@@ -514,7 +712,7 @@ describe('Switcher - Definetely not useless Super Mega Advanced Functionality', 
     const mockFn = jest.fn();
     Switch(42)
       .case(42, mockFn)
-      .case(42, () => {})
+      .case(42, () => { })
       .execute();
     expect(mockFn).toHaveBeenCalled();
   });
@@ -589,17 +787,17 @@ describe('Switcher - Definetely not useless Super Mega Advanced Functionality', 
     expect(mockFn).toHaveBeenCalled();
   });
   test('should handle new String("123") === "123" and return a value', () => {
-  const result = Switch(new String('123'))
-    .case('123', (v) => `Matched: ${v}`)
-    .execute();
-  expect(result).toBe('Matched: 123');
-});
+    const result = Switch(new String('123'))
+      .case('123', (v) => `Matched: ${v}`)
+      .execute();
+    expect(result).toBe('Matched: 123');
+  });
 
-test('should handle absurdly large numbers and return undefined', () => {
-  const result = Switch(1e100)
-    .case(1, () => {})
-    .case(2, () => {})
-    .execute();
-  expect(result).toBeUndefined();
-});
+  test('should handle absurdly large numbers and return undefined', () => {
+    const result = Switch(1e100)
+      .case(1, () => { })
+      .case(2, () => { })
+      .execute();
+    expect(result).toBeUndefined();
+  });
 });
