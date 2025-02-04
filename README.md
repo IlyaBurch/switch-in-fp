@@ -50,6 +50,11 @@ Switch(42)
   .else(() => console.log('No matching case'))
   .execute();
 // Output: 42
+
+const result = Switch(42)
+  .case(42, (v) => v * 2)
+  .execute();
+console.log(result); // Output: 84
 ```
 Advanced Example 
 ```javascript
