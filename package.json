@@ -5,10 +5,18 @@
   "scripts": {
     "test": "jest"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": ["switch", "case", "if"],
+  "author": "Ilya Burch",
+  "license": "MIT",
+    "repository": {
+    "type": "git",
+    "url": "https://github.com/IlyaBurch/switch-in-fp"
+  },
+  "description": "Switch/case in functional programming style",
+    "bugs": {
+    "url": "https://github.com/username/repo-name/issues"
+  },
+  "homepage": "https://github.com/username/repo-name#readme",
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "jest": "^29.7.0"
