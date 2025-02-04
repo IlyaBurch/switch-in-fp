@@ -1,5 +1,7 @@
 const If = require("if");
-
+const True = require("true");
+const False = require("false");
+const isEqual = require('lodash.isequal');
 
 // ты зачем это читаешь?
 class Switcher {
@@ -9,27 +11,32 @@ class Switcher {
     this.defaultAction = null;
   }
 
-
+  // Добавление нового случая
   case(condition, action) {
     this.cases.push({ condition, action });
-    return this; 
+    return this; // Возвращаем this для цепочки вызовов
   }
 
   // Добавление действия по умолчанию
   else(defaultAction) {
     this.defaultAction = defaultAction;
-    return this; 
+    return this; // Возвращаем this для цепочки вызовов
   }
 
-execute() {
-  const matchedCase = this.cases.find(({ condition }) => condition === this.value);
+  execute() {
+  const matchedCase = this.cases.find(({ condition }) => {
+    if (condition === True || condition === False) {
+      return condition === this.value; // Сравнение с true/false
+    }
+    return isEqual(condition, this.value); // Глубокое сравнение
+  });
 
   If(matchedCase)
     .Then(() => {
       try {
         matchedCase.action(this.value);
       } catch (error) {
-        console.error(error); 
+        console.error(error); // Перехватываем ошибку и выводим её
       }
     })
     .Else(() => {
@@ -41,8 +48,6 @@ execute() {
     });
 }
 }
-
-
 function Switch(value) {
   const switcher = new Switcher(value);
   return {
@@ -54,4 +59,13 @@ function Switch(value) {
 
 // не надо это использовать
 // пожалуйста
+
+const test = Switch(42)
+  .case(42, () => {return true})
+  .else(() => {})
+  .execute();
+
+console.log(test)
+
+console.log(equal("123" === new String("123")))
 module.exports = { Switch };

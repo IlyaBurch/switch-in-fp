@@ -63,7 +63,7 @@ Switch(7)
 ```
 Asynchronous Actions
 ```javascript
-SwitcherFactory(6)
+Switch(6)
   .case(6, async () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     console.log('Async action executed');
