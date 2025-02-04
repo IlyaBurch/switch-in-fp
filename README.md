@@ -35,7 +35,7 @@ yarn add switch-in-fp
 
 ---
 
-##🛠️ Usage 
+## 🛠️ Usage 
 
 Here’s how you can use this package to make your code unnecessarily complex: 
 ```javascript
