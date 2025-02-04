@@ -3,7 +3,8 @@ const True = require("true");
 const False = require("false");
 const isEqual = require('lodash.isequal');
 
-// ты зачем это читаешь?
+// // ты зачем это читаешь?
+
 class Switcher {
   constructor(value) {
     this.value = value;
@@ -13,7 +14,12 @@ class Switcher {
 
   // Добавление нового случая
   case(condition, action) {
-    this.cases.push({ condition, action });
+    const existingCase = this.cases.find((c) => isEqual(c.condition, condition));
+
+    If(!existingCase)
+      .Then(() => this.cases.push({ condition, action }))
+      .Else(() => console.log('Case already exists'));
+
     return this; // Возвращаем this для цепочки вызовов
   }
 
@@ -31,23 +37,20 @@ class Switcher {
     return isEqual(condition, this.value); // Глубокое сравнение
   });
 
-  If(matchedCase)
-    .Then(() => {
-      try {
-        matchedCase.action(this.value);
-      } catch (error) {
-        console.error(error); // Перехватываем ошибку и выводим её
-      }
-    })
-    .Else(() => {
-      if (this.defaultAction) {
-        this.defaultAction();
-      } else {
-        console.log('No matching case found');
-      }
-    });
+  if (matchedCase) {
+    try {
+      return matchedCase.action(this.value); // Возвращаем результат действия
+    } catch (error) {
+      console.error(error); // Перехватываем ошибку и выводим её
+    }
+  } else if (this.defaultAction) {
+    return this.defaultAction(); // Возвращаем результат действия по умолчанию
+  } else {
+    console.log('No matching case found');
+  }
 }
 }
+
 function Switch(value) {
   const switcher = new Switcher(value);
   return {
@@ -56,16 +59,6 @@ function Switch(value) {
     execute: switcher.execute.bind(switcher),
   };
 }
-
 // не надо это использовать
 // пожалуйста
-
-const test = Switch(42)
-  .case(42, () => {return true})
-  .else(() => {})
-  .execute();
-
-console.log(test)
-
-console.log(equal("123" === new String("123")))
 module.exports = { Switch };

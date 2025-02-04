@@ -4,6 +4,19 @@ const True = require('true');
 const False = require('false');
 
 describe('Switcher - Basic Functionality', () => {
+  test('should execute the correct case and return a value', () => {
+  const result = Switch(42)
+    .case(42, (v) => v * 2)
+    .execute();
+  expect(result).toBe(84);
+});
+
+test('should handle no matching case and return undefined', () => {
+  const result = Switch(50)
+    .case(42, () => {})
+    .execute();
+  expect(result).toBeUndefined();
+});
   test('should execute the correct case with deep equality', () => {
     const mockFn = jest.fn();
     Switch([{ key: 'value' }])
@@ -33,6 +46,19 @@ describe('Switcher - Basic Functionality', () => {
 });
 
 describe('Switcher - Edge Cases', () => {
+  test('should handle zero as input and return a value', () => {
+  const result = Switch(0)
+    .case(0, (v) => v + 1)
+    .execute();
+  expect(result).toBe(1);
+});
+
+test('should handle negative numbers and return a value', () => {
+  const result = Switch(-1)
+    .case(-1, (v) => v * -1)
+    .execute();
+  expect(result).toBe(1);
+});
   test('should handle zero as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
     Switch(0)
@@ -114,6 +140,31 @@ describe('Switcher - Edge Cases', () => {
 });
 
 describe('Switcher - Advanced Scenarios', () => {
+  test('should handle duplicate cases and return the first match', () => {
+  const result = Switch(1)
+    .case(1, (v) => v + 1)
+    .case(1, (v) => v + 2)
+    .execute();
+  expect(result).toBe(2); // Первый случай должен быть выполнен
+});
+
+test('should handle asynchronous functions and return a value', async () => {
+  const result = await Switch(6)
+    .case(6, async () => {
+      return 'Async result';
+    })
+    .execute();
+  expect(result).toBe('Async result');
+});
+
+test('should handle errors in actions and return undefined', () => {
+  const result = Switch(7)
+    .case(7, () => {
+      throw new Error('Something went wrong');
+    })
+    .execute();
+  expect(result).toBeUndefined(); // Ошибка должна быть обработана
+});
   test('should handle new String("123") === "123" using deep equality', () => {
     const mockFn = jest.fn();
     Switch(new String('123'))
@@ -537,4 +588,18 @@ describe('Switcher - Definetely not useless Super Mega Advanced Functionality', 
       .execute();
     expect(mockFn).toHaveBeenCalled();
   });
+  test('should handle new String("123") === "123" and return a value', () => {
+  const result = Switch(new String('123'))
+    .case('123', (v) => `Matched: ${v}`)
+    .execute();
+  expect(result).toBe('Matched: 123');
+});
+
+test('should handle absurdly large numbers and return undefined', () => {
+  const result = Switch(1e100)
+    .case(1, () => {})
+    .case(2, () => {})
+    .execute();
+  expect(result).toBeUndefined();
+});
 });
