@@ -1,19 +1,23 @@
 {
   "name": "switch-in-fp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "src/index.js",
   "scripts": {
     "test": "jest"
   },
-  "keywords": ["switch", "case", "if"],
+  "keywords": [
+    "switch",
+    "case",
+    "if"
+  ],
   "author": "Ilya Burch",
   "license": "MIT",
-    "repository": {
+  "repository": {
     "type": "git",
     "url": "https://github.com/IlyaBurch/switch-in-fp"
   },
   "description": "Switch/case in functional programming style",
-    "bugs": {
+  "bugs": {
     "url": "https://github.com/username/repo-name/issues"
   },
   "homepage": "https://github.com/username/repo-name#readme",
