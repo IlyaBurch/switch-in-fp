@@ -19,6 +19,7 @@ This package provides a functional programming-style `switch-case` implementatio
 - **Edge Case Support**: Handles `null`, `undefined`, empty strings, arrays, objects, and even negative numbers. (Why? I don't know either.)
 - **Error Handling**: Catches errors in actions and logs them to the console. You're welcome.
 - **Asynchronous Actions**: Supports async functions, Promises, `setTimeout`, and `setInterval`. Because blocking the event loop is so last year.
+- **Default Action**: Provides an `.else()` method for handling unmatched cases.
 
 ---
 
@@ -41,27 +42,34 @@ yarn add switch-in-fp
 
 Here’s how you can use this package to make your code unnecessarily complex: 
 ```javascript
-const { Switch } = require('switch-in-fp');
+const { SwitcherFactory } = require('switch-in-fp');
 
-Switch
-  .case(1, () => console.log('Case 1 executed'))
-  .case(2, () => console.log('Case 2 executed'));
-
-Switch.switch(2); // Output: "Case 2 executed"
-Switch.switch(5); // Output: "No matching case found"
+Switch(42)
+  .case(42, (v) => console.log(v))
+  .case(43, (v) => console.log(v))
+  .else(() => console.log('No matching case'))
+  .execute();
+// Output: 42
 ```
 Advanced Example 
 ```javascript
-Switch
-  .case(1, () => {
-    console.log('Case 1');
+Switch(7)
+  .case(7, () => {
+    throw new Error('Something went wrong');
   })
-  .case(2, async () => {
+  .else(() => console.log('Default action'))
+  .execute();
+// Logs the error and continues execution
+```
+Asynchronous Actions
+```javascript
+SwitcherFactory(6)
+  .case(6, async () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log('Async Case 2');
-  });
-
-Switch.switch(2); // Waits 1 second, then logs "Async Case 2"
+    console.log('Async action executed');
+  })
+  .execute();
+// Waits 1 second, then logs "Async action executed"
 ```
 
 ---
@@ -84,7 +92,7 @@ This project is licensed under the MIT License. Do whatever you want with it, bu
 
 ## ⚠️ Warning 
 
-If you find yourself using this package to replace in real project a simple if-else or switch-case, please stop it. Get some help. 
+If you find yourself using this package to replace in real project a simple switch-case, please stop it. Get some help. 
 
 ---
 

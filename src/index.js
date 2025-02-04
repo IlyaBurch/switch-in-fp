@@ -1,33 +1,57 @@
 const If = require("if");
 
+
+// ты зачем это читаешь?
 class Switcher {
-  constructor() {
+  constructor(value) {
+    this.value = value;
     this.cases = [];
+    this.defaultAction = null;
   }
 
-  // Добавление нового случая
-case(condition, action) {
-  this.cases.push({ condition, action });
-  return this; // Возвращаем this для цепочки вызовов
-}
 
-  // Выполнение соответствующего случая
-switch(value) {
-  const matchedCase = this.cases.find(({ condition }) => condition === value);
+  case(condition, action) {
+    this.cases.push({ condition, action });
+    return this; 
+  }
+
+  // Добавление действия по умолчанию
+  else(defaultAction) {
+    this.defaultAction = defaultAction;
+    return this; 
+  }
+
+execute() {
+  const matchedCase = this.cases.find(({ condition }) => condition === this.value);
 
   If(matchedCase)
     .Then(() => {
       try {
-        matchedCase.action();
+        matchedCase.action(this.value);
       } catch (error) {
-        console.error(error); // Перехватываем ошибку и выводим её
+        console.error(error); 
       }
     })
-    .Else(() => console.log('No matching case found'));
+    .Else(() => {
+      if (this.defaultAction) {
+        this.defaultAction();
+      } else {
+        console.log('No matching case found');
+      }
+    });
 }
 }
 
-// Создание экземпляра Switcher
-const Switch = new Switcher();
 
+function Switch(value) {
+  const switcher = new Switcher(value);
+  return {
+    case: switcher.case.bind(switcher),
+    else: switcher.else.bind(switcher),
+    execute: switcher.execute.bind(switcher),
+  };
+}
+
+// не надо это использовать
+// пожалуйста
 module.exports = { Switch };

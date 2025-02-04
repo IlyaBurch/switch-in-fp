@@ -1,104 +1,162 @@
-const { Switch } = require('../src/index');
+const { Switch: Switch } = require('../src/index');
 
-describe('Switch - Basic Functionality', () => {
+describe('Switcher - Basic Functionality', () => {
   test('should execute the correct case', () => {
     const mockFn1 = jest.fn();
     const mockFn2 = jest.fn();
 
-    Switch
-      .case(1, mockFn1)
-      .case(2, mockFn2);
+    Switch(42)
+      .case(42, mockFn1)
+      .case(43, mockFn2)
+      .execute();
 
-    Switch.switch(2);
-    expect(mockFn2).toHaveBeenCalled();
-    expect(mockFn1).not.toHaveBeenCalled();
+    expect(mockFn1).toHaveBeenCalled();
+    expect(mockFn2).not.toHaveBeenCalled();
   });
 
-  test('should handle no matching case', () => {
+  test('should handle no matching case with default action', () => {
+    const mockFn = jest.fn();
+
+    Switch(50)
+      .case(42, () => {})
+      .case(43, () => {})
+      .else(mockFn)
+      .execute();
+
+    expect(mockFn).toHaveBeenCalled();
+  });
+
+  test('should handle no matching case without default action', () => {
     console.log = jest.fn(); // Перехватываем console.log
 
-    Switch.switch(5);
+    Switch(50)
+      .case(42, () => {})
+      .case(43, () => {})
+      .execute();
+
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
 });
 
-describe('Switch - Edge Cases', () => {
+describe('Switcher - Edge Cases', () => {
   test('should handle zero as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
 
-    Switch.switch(0);
+    Switch(0)
+      .case(1, () => {})
+      .case(2, () => {})
+      .execute();
+
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
 
   test('should handle negative numbers', () => {
     console.log = jest.fn(); // Перехватываем console.log
 
-    Switch.switch(-1);
+    Switch(-1)
+      .case(1, () => {})
+      .case(2, () => {})
+      .execute();
+
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
 
   test('should handle null as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
 
-    Switch.switch(null);
+    Switch(null)
+      .case(1, () => {})
+      .case(2, () => {})
+      .execute();
+
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
 
   test('should handle undefined as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
 
-    Switch.switch(undefined);
+    Switch(undefined)
+      .case(1, () => {})
+      .case(2, () => {})
+      .execute();
+
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
 
   test('should handle empty string as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
 
-    Switch.switch('');
+    Switch('')
+      .case(1, () => {})
+      .case(2, () => {})
+      .execute();
+
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
 
   test('should handle empty array as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
 
-    Switch.switch([]);
+    Switch([])
+      .case(1, () => {})
+      .case(2, () => {})
+      .execute();
+
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
 
   test('should handle empty object as input', () => {
     console.log = jest.fn(); // Перехватываем console.log
 
-    Switch.switch({});
+    Switch({})
+      .case(1, () => {})
+      .case(2, () => {})
+      .execute();
+
     expect(console.log).toHaveBeenCalledWith('No matching case found');
   });
 });
 
-describe('Switch - Advanced Scenarios', () => {
+describe('Switcher - Advanced Scenarios', () => {
+  test('should handle duplicate cases', () => {
+    const mockFn1 = jest.fn();
+    const mockFnDuplicate = jest.fn();
+
+    Switch(1)
+      .case(1, mockFn1)
+      .case(1, mockFnDuplicate)
+      .execute();
+
+    expect(mockFn1).toHaveBeenCalled();
+    expect(mockFnDuplicate).not.toHaveBeenCalled(); // Вторая функция не должна быть вызвана
+  });
+
   test('should handle asynchronous functions', async () => {
     const asyncMockFn = jest.fn(async () => {
       return 'Async result';
     });
 
-    Switch.case(6, asyncMockFn);
+    await Switch(6)
+      .case(6, asyncMockFn)
+      .execute();
 
-    Switch.switch(6);
     expect(asyncMockFn).toHaveBeenCalled();
   });
 
-test('should handle errors in actions', () => {
-  const errorThrowingFn = jest.fn(() => {
-    throw new Error('Something went wrong');
+  test('should handle errors in actions', () => {
+    const errorThrowingFn = jest.fn(() => {
+      throw new Error('Something went wrong');
+    });
+
+    console.error = jest.fn(); // Перехватываем console.error
+
+    Switch(7)
+      .case(7, errorThrowingFn)
+      .execute();
+
+    expect(errorThrowingFn).toHaveBeenCalled();
+    expect(console.error).toHaveBeenCalledWith(expect.any(Error)); // Ошибка должна быть обработана
   });
-
-  console.error = jest.fn(); // Перехватываем console.error
-
-  Switch.case(7, errorThrowingFn);
-
-  Switch.switch(7);
-
-  expect(errorThrowingFn).toHaveBeenCalled();
-  expect(console.error).toHaveBeenCalledWith(expect.any(Error)); // Ошибка должна быть обработана
-});
 
   test('should handle global state modifications', () => {
     let globalState = 0;
@@ -106,9 +164,10 @@ test('should handle errors in actions', () => {
       globalState += 1;
     });
 
-    Switch.case(8, stateModifyingFn);
+    Switch(8)
+      .case(8, stateModifyingFn)
+      .execute();
 
-    Switch.switch(8);
     expect(stateModifyingFn).toHaveBeenCalled();
     expect(globalState).toBe(1);
   });
@@ -119,9 +178,10 @@ test('should handle errors in actions', () => {
       nestedFn();
     });
 
-    Switch.case(9, callingNestedFn);
+    Switch(9)
+      .case(9, callingNestedFn)
+      .execute();
 
-    Switch.switch(9);
     expect(callingNestedFn).toHaveBeenCalled();
     expect(nestedFn).toHaveBeenCalled();
   });
@@ -131,9 +191,10 @@ test('should handle errors in actions', () => {
       return () => x * 2;
     });
 
-    Switch.case(10, closureFn(5));
+    Switch(10)
+      .case(10, closureFn(5))
+      .execute();
 
-    Switch.switch(10);
     expect(closureFn).toHaveBeenCalled();
   });
 
@@ -143,9 +204,10 @@ test('should handle errors in actions', () => {
       return n * recursiveFn(n - 1);
     });
 
-    Switch.case(11, () => recursiveFn(5));
+    Switch(11)
+      .case(11, () => recursiveFn(5))
+      .execute();
 
-    Switch.switch(11);
     expect(recursiveFn).toHaveBeenCalledTimes(5); // Рекурсия вызывается 5 раз
   });
 
@@ -154,20 +216,22 @@ test('should handle errors in actions', () => {
       return Math.random();
     });
 
-    Switch.case(12, externalLibraryFn);
+    Switch(12)
+      .case(12, externalLibraryFn)
+      .execute();
 
-    Switch.switch(12);
     expect(externalLibraryFn).toHaveBeenCalled();
   });
 
-  test('should handle Promises', () => {
+  test('should handle Promises', async () => {
     const promiseFn = jest.fn(() => {
       return new Promise((resolve) => resolve('Promise resolved'));
     });
 
-    Switch.case(13, promiseFn);
+    await Switch(13)
+      .case(13, promiseFn)
+      .execute();
 
-    Switch.switch(13);
     expect(promiseFn).toHaveBeenCalled();
   });
 
@@ -178,9 +242,10 @@ test('should handle errors in actions', () => {
       }, 100);
     });
 
-    Switch.case(14, timeoutFn);
+    Switch(14)
+      .case(14, timeoutFn)
+      .execute();
 
-    Switch.switch(14);
     expect(timeoutFn).toHaveBeenCalled();
   });
 
@@ -194,9 +259,10 @@ test('should handle setInterval inside actions', () => {
     return intervalId;
   });
 
-  Switch.case(15, intervalFn);
+  Switch(15)
+    .case(15, intervalFn)
+    .execute();
 
-  Switch.switch(15);
   expect(intervalFn).toHaveBeenCalled();
 
   // Получаем ID интервала и очищаем его
@@ -209,9 +275,10 @@ test('should handle setInterval inside actions', () => {
       globalThis.testVariable = 'Global variable set';
     });
 
-    Switch.case(16, globalVariableFn);
+    Switch(16)
+      .case(16, globalVariableFn)
+      .execute();
 
-    Switch.switch(16);
     expect(globalVariableFn).toHaveBeenCalled();
     expect(globalThis.testVariable).toBe('Global variable set');
   });
@@ -221,9 +288,10 @@ test('should handle setInterval inside actions', () => {
       eval('console.log("Eval executed")');
     });
 
-    Switch.case(17, evalFn);
+    Switch(17)
+      .case(17, evalFn)
+      .execute();
 
-    Switch.switch(17);
     expect(evalFn).toHaveBeenCalled();
   });
 
@@ -238,10 +306,96 @@ test('should handle setInterval inside actions', () => {
 
     console.error = jest.fn(); // Перехватываем console.error
 
-    Switch.case(18, tryCatchFn);
+    Switch(18)
+      .case(18, tryCatchFn)
+      .execute();
 
-    Switch.switch(18);
     expect(tryCatchFn).toHaveBeenCalled();
     expect(console.error).toHaveBeenCalledWith(expect.any(Error));
+  });
+});
+
+describe('Switcher - Absurd Scenarios', () => {
+  test('should handle absurdly large numbers', () => {
+    console.log = jest.fn(); // Перехватываем console.log
+
+    Switch(1e100)
+      .case(1, () => {})
+      .case(2, () => {})
+      .execute();
+
+    expect(console.log).toHaveBeenCalledWith('No matching case found');
+  });
+
+  test('should handle emojis as conditions', () => {
+    const emojiFn = jest.fn();
+
+    Switch('😂')
+      .case('😊', () => {})
+      .case('😂', emojiFn)
+      .execute();
+
+    expect(emojiFn).toHaveBeenCalled();
+  });
+
+  test('should handle random objects as conditions', () => {
+    const obj = { key: 'value' };
+    const mockFn = jest.fn();
+
+    Switch(obj)
+      .case(obj, mockFn)
+      .execute();
+
+    expect(mockFn).toHaveBeenCalled();
+  });
+
+  test('should handle absurdly long chains of cases', () => {
+    const mockFn = jest.fn();
+
+    Switch(42)
+      .case(1, () => {})
+      .case(2, () => {})
+      .case(3, () => {})
+      .case(4, () => {})
+      .case(5, () => {})
+      .case(6, () => {})
+      .case(7, () => {})
+      .case(8, () => {})
+      .case(9, () => {})
+      .case(10, () => {})
+      .case(42, mockFn)
+      .execute();
+
+    expect(mockFn).toHaveBeenCalled();
+  });
+
+  test('should handle absurdly nested functions', () => {
+    const nestedFn = jest.fn(() => {
+      return () => {
+        return () => {
+          return () => {
+            console.log('Deeply nested function executed');
+          };
+        };
+      };
+    });
+
+    Switch(20)
+      .case(20, nestedFn()()()())
+      .execute();
+
+    expect(nestedFn).toHaveBeenCalled();
+  });
+
+  test('should handle absurdly random actions', () => {
+    const randomFn = jest.fn(() => {
+      Math.random() > 0.5 ? console.log('Heads') : console.log('Tails');
+    });
+
+    Switch(21)
+      .case(21, randomFn)
+      .execute();
+
+    expect(randomFn).toHaveBeenCalled();
   });
 });
