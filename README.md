@@ -1,5 +1,7 @@
 # `switch-in-fp`
 
+![package logo](https://raw.githubusercontent.com/IlyaBurch/switch-in-fp/assets/logo.jpg)
+
 > A functional programming-inspired `switch-case` implementation for JavaScript. Because why not?
 
 ---
